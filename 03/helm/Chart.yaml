@@ -1,0 +1,9 @@
+apiVersion: v2
+name: note-project
+description: A Helm chart for note-application
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1"
