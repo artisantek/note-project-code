@@ -29,9 +29,33 @@ pipeline {
             }
         }
 
-        stage('Kubernetes Deploy') {
+        stage('Kubernetes Deploy - DEV') {
+            when {
+                anyOf {
+                    branch 'development'
+                    branch 'feature/*'
+                }
+            }
             steps {
-                kubernetesEKSDeploy('$dockerImage', '$dockerTag', 'note-project', 'note-project', 'awsCred', 'ap-southeast-1', 'eks-cluster')
+                kubernetesEKSDeploy('$dockerImage', '$dockerTag', 'note-project', 'note-project', 'awsCred', 'ap-southeast-1', 'eks-cluster', 'dev')
+            }
+        }
+
+        stage('Kubernetes Deploy - UAT') {        
+            when {
+                branch 'master_staging'
+            }
+            steps {
+                kubernetesEKSDeploy('$dockerImage', '$dockerTag', 'note-project', 'note-project', 'awsCred', 'ap-southeast-1', 'eks-cluster', 'uat')
+            }
+        }
+
+        stage('Kubernetes Deploy - PROD') {
+            when {
+                branch 'master'
+            }
+            steps {
+                kubernetesEKSDeploy('$dockerImage', '$dockerTag', 'note-project', 'note-project', 'awsCred', 'ap-southeast-1', 'eks-cluster', 'prod')
             }
         }
 
