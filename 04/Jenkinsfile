@@ -2,6 +2,8 @@
 
 pipeline {
     environment {
+        gitRepoURL = "${env.GIT_URL}"
+        gitBranchName = "${env.BRANCH_NAME}"
         repoName = sh(script: "basename -s .git ${GIT_URL}", returnStdout: true).trim()
         dockerImage = "227219889473.dkr.ecr.ap-southeast-1.amazonaws.com/${repoName}"
         branchName = sh(script: 'echo $BRANCH_NAME | sed "s#/#-#"', returnStdout: true).trim()
@@ -13,7 +15,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                gitCheckout('https://github.com/artisantek/note-project.git', 'main', 'githubCred')
+                gitCheckout("$gitRepoURL", "refs/heads/$gitBranchName", 'githubCred')
             }
         }
 
@@ -25,7 +27,7 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                dockerECRImagePush('$dockerImage', '$dockerTag', 'awsCred', 'ap-southeast-1')
+                dockerECRImagePush('$dockerImage', '$dockerTag', '$repoName', 'awsCred', 'ap-southeast-1')
             }
         }
 
@@ -33,7 +35,6 @@ pipeline {
             when {
                 anyOf {
                     branch 'development'
-                    branch 'feature/*'
                 }
             }
             steps {
